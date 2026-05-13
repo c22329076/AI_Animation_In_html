@@ -1,0 +1,403 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPsec Focus | Presentation Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@700&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        iosBlue: '#0A84FF',
+                        iosGreen: '#30D158',
+                        iosIndigo: '#5E5CE6',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* --- 核心環境設定 --- */
+        body {
+            background: #000;
+            color: white;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* 動態極光背景 (Apple Style) */
+        .ambient-bg {
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle at 50% 50%, #1c1c1e 0%, #000 100%);
+            z-index: -2;
+        }
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: breathe 10s infinite alternate;
+            z-index: -1;
+        }
+        .orb-1 { top: 20%; left: 20%; width: 600px; height: 600px; background: #0A84FF; animation-delay: 0s; }
+        .orb-2 { bottom: 10%; right: 10%; width: 500px; height: 500px; background: #5E5CE6; animation-delay: -5s; }
+
+        @keyframes breathe {
+            0% { transform: scale(1) translate(0, 0); opacity: 0.4; }
+            100% { transform: scale(1.1) translate(20px, -20px); opacity: 0.7; }
+        }
+
+        /* --- 佈局容器 --- */
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            height: 100%;
+        }
+        @media (max-width: 768px) {
+            .layout-grid { grid-template-columns: 1fr; grid-template-rows: 1fr 200px; }
+        }
+
+        /* --- 側邊欄 (Sidebar) --- */
+        .sidebar {
+            background: rgba(28, 28, 30, 0.4);
+            backdrop-filter: blur(40px) saturate(180%);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        /* --- 主舞臺 (The Stage) --- */
+        .stage-container {
+            perspective: 1500px; /* 增強透視感 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 3D 卡片軌道 */
+        .cards-track {
+            display: flex;
+            gap: 2rem;
+            transform-style: preserve-3d;
+            transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+            padding: 0 50vw; /* 讓第一個元素居中 */
+        }
+
+        /* --- 液態玻璃卡片 (Liquid Glass Card) --- */
+        .glass-card {
+            width: 280px;
+            height: 380px;
+            border-radius: 30px;
+            background: rgba(60, 60, 65, 0.3);
+            backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            flex-shrink: 0;
+            
+            /* 預設狀態：後退、變暗、模糊 */
+            transform: scale(0.8) translateZ(-100px) rotateY(15deg);
+            opacity: 0.4;
+            filter: blur(2px) grayscale(0.8);
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            
+            display: flex;
+            flex-col;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+        }
+
+        /* 選中狀態：啟用 */
+        .glass-card.active {
+            transform: scale(1.1) translateZ(50px) rotateY(0deg);
+            opacity: 1;
+            filter: blur(0) grayscale(0);
+            background: rgba(80, 80, 90, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 0 rgba(255,255,255,0), 0 30px 60px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        /* 選中時的光暈輝光 */
+        .glass-card.active::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 32px;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.3), transparent);
+            z-index: -1;
+            animation: shine 2s infinite;
+        }
+
+        @keyframes shine {
+            0% { opacity: 0.5; }
+            50% { opacity: 1; }
+            100% { opacity: 0.5; }
+        }
+
+        /* --- 熒光筆特效 (Highlighter) --- */
+        .highlight-bg {
+            background: linear-gradient(120deg, rgba(255, 235, 59, 0) 0%, rgba(255, 235, 59, 0) 100%);
+            background-repeat: no-repeat;
+            background-size: 100% 40%;
+            background-position: 0 88%;
+            transition: background-size 0.5s ease;
+        }
+
+        .active .highlight-bg {
+            background-image: linear-gradient(120deg, #F59E0B 0%, #F59E0B 100%);
+            animation: drawHighlight 0.6s 0.3s forwards; /* 延遲播放 */
+            background-size: 0% 40%;
+        }
+
+        @keyframes drawHighlight {
+            to { background-size: 100% 40%; }
+        }
+
+        /* 巨大的字型排版 */
+        .big-number {
+            font-size: 120px;
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), rgba(255,255,255,0.0));
+            -webkit-background-clip: text;
+            color: transparent;
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            pointer-events: none;
+        }
+
+        .card-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 15px rgba(255,255,255,0.4));
+        }
+
+        /* --- 隧道模式連線線 --- */
+        .chain-link {
+            position: absolute;
+            height: 10px;
+            width: 50px;
+            background: #444;
+            top: 50%;
+            right: -45px;
+            z-index: -1;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="layout-grid">
+        
+        <aside class="sidebar text-left">
+            <div class="mb-auto">
+                <div class="text-xs font-bold tracking-[0.3em] text-gray-400 mb-4 uppercase">IPsec Protocol</div>
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-white leading-tight">
+                    資料流轉<br>
+                    <span class="text-iosGreen">視覺化解析</span>
+                </h1>
+                
+                <div id="narrative-box" class="transition-opacity duration-300">
+                    <p class="text-xl text-gray-200 leading-relaxed font-light" id="narrative-text">
+                        點擊右側卡片或使用方向鍵 <kbd class="bg-white/20 px-2 py-1 rounded text-sm font-mono">←</kbd> <kbd class="bg-white/20 px-2 py-1 rounded text-sm font-mono">→</kbd> 開始演示。
+                    </p>
+                    <div class="mt-8 p-4 bg-white/5 rounded-xl border-l-4 border-iosBlue">
+                        <h3 class="text-sm font-bold text-iosBlue mb-1">KEY TAKEAWAY</h3>
+                        <p class="text-sm text-gray-400" id="narrative-note">
+                            IPsec 工作在網路層，對應用層透明。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-8 flex items-center gap-4">
+                <button onclick="toggleTunnelMode()" id="mode-btn" class="flex-1 py-4 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/10 transition-all text-sm font-bold tracking-wider">
+                    <i class="fa-solid fa-toggle-off mr-2"></i>
+                    <span>SWITCH TO TUNNEL</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="stage-container" id="stage">
+            <div class="cards-track" id="track">
+                
+                <div class="glass-card active" data-index="0" onclick="focusCard(0)">
+                    <div class="big-number">01</div>
+                    <i class="fa-solid fa-mobile-screen-button card-icon text-yellow-400"></i>
+                    <h2 class="text-3xl font-bold mb-2">應用資料</h2>
+                    <div class="text-lg font-mono text-gray-300 highlight-bg px-1">Payload</div>
+                </div>
+
+                <div class="glass-card" data-index="1" onclick="focusCard(1)">
+                    <div class="big-number">02</div>
+                    <i class="fa-solid fa-cube card-icon text-iosIndigo"></i>
+                    <h2 class="text-3xl font-bold mb-2">TCP 封裝</h2>
+                    <div class="text-lg font-mono text-gray-300 highlight-bg px-1">Port: 443</div>
+                </div>
+
+                <div class="glass-card" data-index="2" onclick="focusCard(2)">
+                    <div class="big-number">03</div>
+                    <i class="fa-solid fa-network-wired card-icon text-iosBlue"></i>
+                    <h2 class="text-3xl font-bold mb-2">原始 IP</h2>
+                    <div class="text-lg font-mono text-gray-300 highlight-bg px-1">192.168.1.5</div>
+                </div>
+
+                <div class="glass-card" data-index="3" onclick="focusCard(3)">
+                    <div class="big-number">04</div>
+                    <i class="fa-solid fa-shield-halved card-icon text-iosGreen animate-pulse"></i>
+                    <h2 class="text-3xl font-bold mb-2">IPsec 攔截</h2>
+                    <div class="text-lg font-mono text-gray-300 highlight-bg px-1">ESP Encrypt</div>
+                </div>
+
+                <div class="glass-card hidden-mode" id="card-tunnel" data-index="4" onclick="focusCard(4)" style="display:none; border-style: dashed;">
+                    <div class="big-number">05</div>
+                    <i class="fa-solid fa-globe card-icon text-white"></i>
+                    <h2 class="text-3xl font-bold mb-2">外層 IP</h2>
+                    <div class="text-lg font-mono text-gray-300 highlight-bg px-1">Gateway IP</div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 資料模型：每一頁的解說詞
+        const storyData = [
+            {
+                title: "應用層資料產生",
+                text: "一切始於應用層。無論是 <span class='text-yellow-400 font-bold'>HTTP 請求</span> 還是資料庫查詢，此時資料是明文的（對於網路層而言）。",
+                note: "使用者點擊傳送，資料進入核心協議棧。"
+            },
+            {
+                title: "傳輸層封裝",
+                text: "作業系統為資料加上 <span class='text-iosIndigo font-bold'>TCP/UDP 頭</span>。關鍵資訊是源連接埠和目的連接埠。",
+                note: "資料包此時包含了由哪個程式發出的資訊。"
+            },
+            {
+                title: "網路層定址",
+                text: "新增 <span class='text-iosBlue font-bold'>IP 頭</span>。包含了你的私網 IP 地址。在普通傳輸中，這就是最終的包頭。",
+                note: "原始 IP 暴露了真實的傳送者位置。"
+            },
+            {
+                title: "IPsec 安全攔截",
+                text: "IPsec 策略引擎在資料包發出前<span class='text-iosGreen font-bold'>攔截</span>它。進行加密 (ESP) 或認證 (AH)。",
+                note: "此刻起，資料載荷對中間人不可見。"
+            },
+            {
+                title: "隧道模式封裝",
+                text: "在隧道模式下，IPsec 會生成一個<span class='text-white font-bold'>全新的 IP 頭</span>（通常是閘道器地址）包裹整個原資料包。",
+                note: "外界只能看到兩個閘道器在通訊，看不到內部主機。"
+            }
+        ];
+
+        let currentIndex = 0;
+        let isTunnelMode = false;
+        const track = document.getElementById('track');
+        const cards = document.querySelectorAll('.glass-card');
+        const narrativeText = document.getElementById('narrative-text');
+        const narrativeNote = document.getElementById('narrative-note');
+        const cardWidth = 320; // card width + gap approx
+
+        function focusCard(index) {
+            // 防止索引越界
+            if (index < 0) index = 0;
+            const maxIndex = isTunnelMode ? 4 : 3;
+            if (index > maxIndex) index = maxIndex;
+
+            currentIndex = index;
+
+            // 1. 移動軌道 (Camera Move)
+            // 計算位移：讓當前卡片居中
+            // 視口中心是 50vw，我們需要移動 track 讓第 index 個元素位於 50vw
+            // 初始 padding-left 是 50vw
+            const offset = -(index * (280 + 32)); // 280 width + 32 gap
+            track.style.transform = `translateX(${offset}px)`;
+
+            // 2. 更新卡片狀態 (Visual State)
+            document.querySelectorAll('.glass-card').forEach((c, i) => {
+                if (i === index) {
+                    c.classList.add('active');
+                } else {
+                    c.classList.remove('active');
+                }
+            });
+
+            // 3. 更新側邊欄文字 (Storytelling)
+            const story = storyData[index];
+            const narrativeBox = document.getElementById('narrative-box');
+            
+            // 簡單的淡入淡出
+            narrativeBox.style.opacity = 0;
+            setTimeout(() => {
+                narrativeText.innerHTML = story.text;
+                narrativeNote.innerText = story.note;
+                narrativeBox.style.opacity = 1;
+            }, 300);
+        }
+
+        // 切換隧道模式
+        function toggleTunnelMode() {
+            isTunnelMode = !isTunnelMode;
+            const btn = document.getElementById('mode-btn');
+            const tunnelCard = document.getElementById('card-tunnel');
+
+            if (isTunnelMode) {
+                btn.innerHTML = '<i class="fa-solid fa-toggle-on mr-2 text-iosGreen"></i> SWITCH TO TRANSPORT';
+                btn.classList.add('border-iosGreen');
+                tunnelCard.style.display = 'flex'; // 顯示卡片
+                setTimeout(() => {
+                    focusCard(4); // 自動跳到隧道卡片演示
+                }, 100);
+            } else {
+                btn.innerHTML = '<i class="fa-solid fa-toggle-off mr-2"></i> SWITCH TO TUNNEL';
+                btn.classList.remove('border-iosGreen');
+                if (currentIndex === 4) focusCard(3); // 如果在隧道卡片，退回上一張
+                setTimeout(() => {
+                    tunnelCard.style.display = 'none';
+                }, 500);
+            }
+        }
+
+        // 鍵盤監聽
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') {
+                focusCard(currentIndex + 1);
+            } else if (e.key === 'ArrowLeft') {
+                focusCard(currentIndex - 1);
+            }
+        });
+
+        // 初始化
+        focusCard(0);
+
+    </script>
+</body>
+</html>

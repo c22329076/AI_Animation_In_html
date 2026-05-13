@@ -1,0 +1,757 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding: AI 時代的程式設計新正規化</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reset.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/theme/dracula.min.css" id="theme">
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai.min.css">
+    <style>
+        /* Base styling enhancements */
+        .reveal h1, .reveal h2, .reveal h3, .reveal h4 {
+            text-transform: none;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin-bottom: 20px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .reveal h1 {
+            font-size: 3.5em;
+            background: linear-gradient(45deg, #bd93f9, #ff79c6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px #bd93f9, 0 0 10px #bd93f9;
+            }
+            to {
+                text-shadow: 0 0 10px #bd93f9, 0 0 20px #bd93f9, 0 0 30px #ff79c6;
+            }
+        }
+        
+        .reveal h2 {
+            font-size: 2.5em;
+            color: #8be9fd;
+        }
+        
+        .reveal h3 {
+            font-size: 1.8em;
+            color: #50fa7b;
+        }
+        
+        .reveal p, .reveal ul, .reveal li {
+            font-size: 0.9em;
+            line-height: 1.8;
+            color: #e0e0e0;
+        }
+        
+        /* Enhanced text styling */
+        .highlight-text {
+            color: #bd93f9; /* Dracula Purple */
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .highlight-text:hover {
+            color: #ff79c6;
+            text-shadow: 0 0 10px #ff79c6;
+        }
+        
+        .accent-text {
+            color: #ff79c6; /* Dracula Pink */
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        /* Enhanced container layout */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .col {
+            flex: 1;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .col:hover {
+            transform: translateY(-5px);
+        }
+        
+        /* Enhanced code box styling */
+        .code-box {
+            background: linear-gradient(135deg, #282a36, #44475a);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: left;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.7em;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            border: 1px solid #bd93f9;
+            transition: all 0.3s ease;
+        }
+        
+        .code-box:hover {
+            box-shadow: 0 12px 24px rgba(189, 147, 249, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* Enhanced tag styling */
+        .tag {
+            background: linear-gradient(45deg, #44475a, #6272a4);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            margin-right: 10px;
+            margin-bottom: 10px;
+            display: inline-block;
+            border: 1px solid #bd93f9;
+            transition: all 0.3s ease;
+        }
+        
+        .tag:hover {
+            background: linear-gradient(45deg, #bd93f9, #ff79c6);
+            color: #282a36;
+            transform: scale(1.05);
+        }
+        
+        /* Custom progress bar with animation */
+        .reveal .progress {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .reveal .progress span {
+            background: linear-gradient(90deg, #bd93f9, #ff79c6, #50fa7b, #8be9fd);
+            background-size: 400% 100%;
+            animation: gradient 3s ease infinite;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Enhanced fragment animations */
+        .reveal .slides section .fragment {
+            transition: all 0.5s ease;
+        }
+        
+        .reveal .slides section .fragment.fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .reveal .slides section .fragment.fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .reveal .slides section .fragment.grow {
+            transform: scale(0.8);
+        }
+        
+        .reveal .slides section .fragment.grow.visible {
+            transform: scale(1);
+        }
+        
+        .reveal .slides section .fragment.shrink {
+            transform: scale(1.2);
+        }
+        
+        .reveal .slides section .fragment.shrink.visible {
+            transform: scale(1);
+        }
+        
+        /* Enhanced list styling */
+        .reveal ul {
+            list-style-type: none;
+        }
+        
+        .reveal ul li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .reveal ul li:hover {
+            transform: translateX(10px);
+            color: #bd93f9;
+        }
+        
+        .reveal ul li:before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: #50fa7b;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .reveal ul li:hover:before {
+            color: #ff79c6;
+            transform: translateX(5px);
+        }
+        
+        /* Enhanced image styling */
+        .reveal section img {
+            border: 2px solid #bd93f9;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .reveal section img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 24px rgba(189, 147, 249, 0.3);
+        }
+        
+        /* Enhanced blockquote styling */
+        .reveal blockquote {
+            background: linear-gradient(135deg, #44475a, #6272a4);
+            border-left: 10px solid #bd93f9;
+            padding: 30px;
+            margin: 40px auto;
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            font-size: 1.1em;
+            line-height: 1.8;
+        }
+        
+        .reveal blockquote cite {
+            display: block;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #8be9fd;
+        }
+        
+        /* Enhanced code styling */
+        .reveal code {
+            background: #282a36;
+            color: #f8f8f2;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9em;
+            border: 1px solid #6272a4;
+        }
+        
+        /* Enhanced container for layout */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 30px;
+        }
+        
+        .col {
+            flex: 1;
+            padding: 15px;
+        }
+        
+        /* Add background patterns */
+        body {
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(189, 147, 249, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 121, 198, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(80, 250, 123, 0.1) 0%, transparent 50%);
+        }
+        
+        /* Enhanced button styling */
+        button {
+            background: linear-gradient(45deg, #50fa7b, #8be9fd);
+            color: #282a36;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(80, 250, 123, 0.3);
+        }
+        
+        button:hover {
+            background: linear-gradient(45deg, #8be9fd, #50fa7b);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(80, 250, 123, 0.5);
+        }
+        
+        /* Animation delay for fragments */
+        .fragment:nth-child(1) { animation-delay: 0.1s; }
+        .fragment:nth-child(2) { animation-delay: 0.2s; }
+        .fragment:nth-child(3) { animation-delay: 0.3s; }
+        .fragment:nth-child(4) { animation-delay: 0.4s; }
+        .fragment:nth-child(5) { animation-delay: 0.5s; }
+        .fragment:nth-child(6) { animation-delay: 0.6s; }
+        .fragment:nth-child(7) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Title Slide: Zoom effect, stays for 3 seconds -->
+            <section data-background-gradient="linear-gradient(to bottom right, #282a36, #44475a)" data-transition="zoom" data-autoslide="3000">
+                <h1>Vibe Coding</h1>
+                <h3>AI 時代的程式設計新正規化</h3>
+                <p style="margin-top: 50px; color: #8be9fd;">面向初級程式設計師的深度解析</p>
+                <div style="font-size: 0.6em; margin-top: 20px; color: #6272a4;">
+                    Made with Reveal.js
+                </div>
+            </section>
+
+            <!-- Agenda: Fast items (2s each) -->
+            <section data-autoslide="2000" data-transition="convex">
+                <h2>本次分享大綱</h2>
+                <div class="container">
+                    <div class="col">
+                        <ul style="font-size: 0.9em;">
+                            <li class="fragment">🚀 <strong>Vibe Coding</strong> 定義與演進</li>
+                            <li class="fragment">🛠️ <strong>主流 IDE</strong> (Cursor, Trae, Kiro)</li>
+                            <li class="fragment">💻 <strong>CLI 程式設計</strong> (Claude Code)</li>
+                            <li class="fragment">🔌 <strong>MCP</strong> (模型上下文協議)</li>
+                            <li class="fragment">🤖 <strong>Agent</strong> (智慧體)</li>
+                            <li class="fragment">⚡ <strong>Skills</strong> (技能與工具)</li>
+                            <li class="fragment">🏗️ <strong>實戰案例</strong> (從零開發)</li>
+                        </ul>
+                    </div>
+                    <div class="col">
+                         <img src="https://placehold.co/400x400/282a36/bd93f9?text=AI+Coding" alt="Agenda Illustration" style="border-radius: 10px;">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Part 1: Vibe Coding -->
+            <section>
+                <section data-autoslide="8000">
+                    <h2>1. 什麼是 Vibe Coding?</h2>
+                    <blockquote style="background: #44475a; border-left: 10px solid #bd93f9; padding: 20px; margin-top: 40px;">
+                        "我只負責寫 Prompt，複製貼上程式碼，執行，報錯，把錯誤扔回給 AI。我不再寫具體的語法，我只管理程式設計的<b>'氛圍' (Vibe)</b>。"
+                        <br><br>
+                        <cite>— Andrej Karpathy (前 Tesla AI 總監, OpenAI 創始成員)</cite>
+                    </blockquote>
+                </section>
+
+                <section data-autoslide="6000">
+                    <h3>核心概念</h3>
+                    <div class="container">
+                        <div class="col">
+                            <ul>
+                                <li><strong>從 Coder 到 Manager：</strong> 你不再是搬磚的工人，你是包工頭。</li>
+                                <li><strong>自然語言即程式碼：</strong> 英語（或中文）成為了新的程式語言。</li>
+                                <li><strong>關注點轉移：</strong> 從“這個函式怎麼寫”轉移到“這個功能應該長什麼樣”。</li>
+                                <li><strong>只要能跑就行：</strong> 即使程式碼很醜，只要透過測試且實現功能，就是好程式碼。</li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <div class="code-box">
+                                <span style="color: #6272a4;">// 傳統程式設計</span><br>
+                                <span style="color: #ff79c6;">function</span> <span style="color: #50fa7b;">qSort</span>(arr) { ... }<br><br>
+                                <span style="color: #6272a4;">// Vibe Coding</span><br>
+                                <span style="color: #f1fa8c;">"幫我寫一個快速排序，要帶視覺化動畫，用 React 實現。"</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-autoslide="4000">
+                    <h3>技術演進歷程</h3>
+                    <div style="display: flex; flex-direction: column; align-items: center;">
+                        <div class="fragment fade-up" style="background: #44475a; width: 80%; margin: 10px; padding: 15px; border-radius: 8px;">
+                            <span class="highlight-text">1. Manual Coding</span><br>
+                            查檔案，手寫每一行程式碼，StackOverflow 複製貼上。
+                        </div>
+                        <div class="fragment fade-up" style="background: #44475a; width: 80%; margin: 10px; padding: 15px; border-radius: 8px;">
+                            <span class="highlight-text">2. Copilot Era (AI 輔助)</span><br>
+                            Tab 鍵補全程式碼，AI 是副駕駛，依然需要人懂每一行邏輯。
+                        </div>
+                        <div class="fragment fade-up" style="background: #bd93f9; color: #282a36; width: 80%; margin: 10px; padding: 15px; border-radius: 8px; font-weight: bold;">
+                            <span class="highlight-text" style="color: #282a36;">3. Vibe Coding (AI 主導)</span><br>
+                            Composer/Agent 模式。AI 編寫整個檔案/模組，人類負責稽核和引導。
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Part 2: Tools -->
+            <section>
+                <section data-transition="zoom" data-autoslide="3000">
+                    <h2>2. 主流開發工具</h2>
+                    <p>工欲善其事，必先利其器。</p>
+                </section>
+
+                <section data-autoslide="6000">
+                    <h3>Cursor <span class="tag">行業標杆</span></h3>
+                    <div class="container">
+                        <div class="col">
+                            <ul>
+                                <li><strong>核心功能：</strong> Tab 自動補全 (Copilot++)、Composer (多檔案編輯)、Codebase Indexing (全庫理解)。</li>
+                                <li><strong>優勢：</strong> 體驗最流暢，模型選擇多 (Claude 3.5, GPT-4o)，社群外掛豐富。</li>
+                                <li><strong>適用場景：</strong> 所有型別的全棧開發。</li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                             <img src="https://placehold.co/500x300/1e1e1e/FFF?text=Cursor+Composer+UI" alt="Cursor Interface">
+                        </div>
+                    </div>
+                </section>
+
+                <section data-autoslide="6000">
+                    <h3>Trae <span class="tag">位元組跳動出品</span></h3>
+                    <div class="container">
+                        <div class="col">
+                            <ul>
+                                <li><strong>核心功能：</strong> 類似 Cursor，但不僅是 IDE，更強調 <strong>Agent (Solo 模式)</strong>。它可以自主執行終端命令、建立檔案。</li>
+                                <li><strong>優勢：</strong> <strong>免費</strong> (目前)，中文支援極其友好，國內訪問速度快。</li>
+                                <li><strong>評價：</strong> "Cursor 的最強國產平替，且在 Agent 能力上更進一步。"</li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <img src="https://placehold.co/500x300/3b82f6/FFF?text=Trae+Solo+Mode" alt="Trae Interface">
+                        </div>
+                    </div>
+                </section>
+
+                <section data-autoslide="6000">
+                    <h3>AWS Kiro <span class="tag">規範驅動</span></h3>
+                    <div class="container">
+                        <div class="col">
+                            <p style="font-size: 0.7em;"><em>注：可能為您提到的 "Kiro"。</em></p>
+                            <ul>
+                                <li><strong>核心理念：</strong> <strong>Spec-Driven Development</strong> (規範驅動開發)。</li>
+                                <li><strong>功能：</strong> 不僅僅是寫程式碼，它會先生成需求檔案 (Spec)，確認無誤後再生成程式碼。</li>
+                                <li><strong>特色：</strong> "Hooks" 功能，自動在儲存時更新檔案或執行測試。</li>
+                                <li><strong>適用：</strong> 需要嚴格檔案和流程的企業級專案。</li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <img src="https://placehold.co/500x300/ff9900/000?text=AWS+Kiro+Spec+View" alt="Kiro Interface">
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Part 3: CLI -->
+            <section>
+                <section data-transition="zoom" data-autoslide="4000">
+                    <h2>3. 常用命令列 (CLI) 程式設計</h2>
+                    <p>拋棄滑鼠，用自然語言控制終端。</p>
+                </section>
+
+                <section data-autoslide="8000">
+                    <h3>代表工具：Claude Code / Codex</h3>
+                    <div class="code-box" style="font-size: 0.8em;">
+                        <span style="color: #50fa7b;">$</span> claude "幫我檢查一下當前目錄的 git status，如果有修改，提交併推送到 origin main，提交資訊寫 'update features'"
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <h4>工作原理：</h4>
+                        <ol style="font-size: 0.8em;">
+                            <li>使用者輸入自然語言指令。</li>
+                            <li>LLM 將其翻譯為 Shell 命令 (git add ., git commit -m ...)。</li>
+                            <li>工具展示即將執行的命令。</li>
+                            <li>使用者確認 (Y/n) -> 執行。</li>
+                        </ol>
+                    </div>
+                </section>
+
+                <section data-autoslide="6000">
+                    <h3>效率提升點</h3>
+                    <ul>
+                        <li><strong>自動化流程：</strong> "把 src 目錄下所有 .js 檔案轉為 .ts，並修復型別錯誤。" (一行命令代替半天工作)</li>
+                        <li><strong>環境配置：</strong> "幫我配置一個 Dockerfile，基於 Node 18，暴露 3000 連接埠。"</li>
+                        <li><strong>Debug：</strong> 直接將錯誤日誌管道傳輸給 AI：<br>
+                            <code>npm run build 2>&1 | claude "解釋這個錯誤並給出修復方案"</code>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- Part 4: MCP -->
+            <section>
+                <section data-transition="convex" data-autoslide="4000">
+                    <h2>4. 什麼是 MCP?</h2>
+                    <h3>Model Context Protocol</h3>
+                    <p class="accent-text">AI 時代的 USB 介面標準</p>
+                </section>
+
+                <section data-autoslide="7000">
+                    <h3>背景與起源</h3>
+                    <p style="text-align: left;">
+                        以前，如果你想讓 ChatGPT 讀取你的本地資料庫，你需要寫一大堆程式碼來“喂”給它。每個工具（Linear, GitHub, Slack, Postgres）都需要單獨的介面卡。
+                        <br><br>
+                        <strong>Anthropic</strong> 提出了 MCP 標準：
+                        <br>
+                        讓所有資料來源都變成統一的“插頭”，所有 AI 模型都變成統一的“插座”。
+                    </p>
+                </section>
+
+                <section data-autoslide="8000">
+                    <h3>架構與案例</h3>
+                    <div class="container">
+                        <div class="col">
+                            <div style="background: #fff; color: #000; padding: 10px; border-radius: 5px; margin-bottom: 10px;">MCP Host (Cursor/Claude)</div>
+                            <div style="font-size: 2em;">⬇️⬆️</div>
+                            <div style="background: #bd93f9; color: #000; padding: 10px; border-radius: 5px;">MCP Server (GitHub/SQLite)</div>
+                        </div>
+                        <div class="col" style="text-align: left; font-size: 0.8em;">
+                            <strong>應用案例：</strong><br>
+                            你在 Cursor 裡問："查看我上週在 Linear 上分配的任務，並在程式碼裡找到對應的 TODO 註釋。"
+                            <br><br>
+                            Cursor 透過 MCP 協議連線 Linear 獲取資料，不需要把資料手動複製貼上。
+                        </div>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Part 5: Agents -->
+            <section>
+                <section data-transition="zoom" data-autoslide="4000">
+                    <h2>5. 什麼是 Agent (智慧體)?</h2>
+                    <p>從“聊天機器人”進化為“數字員工”</p>
+                </section>
+
+                <section data-autoslide="8000">
+                    <h3>核心概念：迴圈 (Loop)</h3>
+                    <div style="background: #282a36; padding: 20px; border-radius: 10px; border: 1px solid #6272a4;">
+                        <span style="color: #8be9fd;">感知 (Perception)</span> →
+                        <span style="color: #ff79c6;">思考 (Brain)</span> →
+                        <span style="color: #50fa7b;">行動 (Action)</span> →
+                        <span style="color: #f1fa8c;">觀察結果 (Observation)</span> →
+                        <span style="color: #8be9fd;">感知...</span>
+                    </div>
+                    <p style="margin-top: 20px; font-size: 0.8em;">
+                        <strong>Chatbot:</strong> 你問它答，它沒有手腳。<br>
+                        <strong>Agent:</strong> 你給目標，它自己分析，自己呼叫工具，自己改錯，直到完成。
+                    </p>
+                </section>
+
+                <section data-autoslide="10000">
+                    <h3>實際案例</h3>
+                    <div style="text-align: left; font-size: 0.85em;">
+                        <strong>場景：</strong> 修復一個 Bug。<br>
+                        <strong>Agent 的思考過程：</strong>
+                        <ol>
+                            <li><span class="highlight-text">[思考]</span> 使用者說登入報錯，我要先復現。</li>
+                            <li><span class="highlight-text">[行動]</span> 執行 `npm test login`。</li>
+                            <li><span class="highlight-text">[觀察]</span> 測試失敗，報錯 "500 Internal Server Error"。</li>
+                            <li><span class="highlight-text">[思考]</span> 可能是後端介面掛了，我要檢查 `auth.js`。</li>
+                            <li><span class="highlight-text">[行動]</span> 讀取 `auth.js` 原始碼。</li>
+                            <li><span class="highlight-text">[思考]</span> 發現漏了一個 await。</li>
+                            <li><span class="highlight-text">[行動]</span> 修改程式碼，儲存。</li>
+                            <li><span class="highlight-text">[行動]</span> 再次執行測試... 透過！</li>
+                        </ol>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Part 6: Skills -->
+            <section>
+                <section data-transition="zoom" data-autoslide="4000">
+                    <h2>6. 什麼是 Skills?</h2>
+                    <p>賦予 Agent “手”和“腳”</p>
+                </section>
+
+                <section data-autoslide="8000">
+                    <h3>含義與演變</h3>
+                    <p><strong>定義：</strong> Skills (或 Tools) 是封裝好的函式，Agent 知道如何呼叫它們。</p>
+                    <div class="code-box">
+                        {<br>
+                        &nbsp;&nbsp;"name": "send_email",<br>
+                        &nbsp;&nbsp;"description": "Send an email to a user",<br>
+                        &nbsp;&nbsp;"parameters": { "to": "string", "body": "string" }<br>
+                        }
+                    </div>
+                    <p style="font-size: 0.8em; margin-top: 10px;">
+                        <strong>演變：</strong> 從簡單的計算器工具，到現在可以操作瀏覽器 (Puppeteer)、運算元據庫、部署雲服務。
+                    </p>
+                </section>
+
+                <section data-autoslide="7000">
+                    <h3>應用效果</h3>
+                    <ul>
+                        <li><strong>提升能力：</strong> 原本 LLM 不知道當前時間，有了 `get_time` skill 就能知道了。</li>
+                        <li><strong>最佳化流程：</strong>
+                            <br>給 Agent 一個 `deploy_to_vercel` 的 Skill。
+                            <br>指令："寫完程式碼後自動幫我部署上線。"
+                            <br>結果：程式碼寫完 -> 測試透過 -> 自動呼叫部署 API 介面 -> 回到上線 URL。
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <!-- Part 7: Comprehensive Case -->
+            <section>
+                <section data-transition="zoom" data-autoslide="4000">
+                    <h2>7. 綜合案例：從零構建番茄鍾</h2>
+                    <p>Vibe Coding 全流程演示</p>
+                </section>
+
+                <section data-autoslide="8000">
+                    <h3>Step 1: 前端 UI 設計 (Vibe 模式)</h3>
+                    <div class="container">
+                        <div class="col" style="font-size: 0.8em; text-align: left;">
+                            <strong>Prompt:</strong><br>
+                            "用 React + Tailwind CSS 幫我寫一個現代極簡風格的番茄鍾。背景要是深色的，中間一個大大的倒計時，下面有開始、暫停、重置按鈕。字型要用等寬字型。"
+                            <br><br>
+                            <strong>操作：</strong><br>
+                            在 Cursor Composer 中輸入 -> 接受所有程式碼 -> 預覽。
+                        </div>
+                        <div class="col">
+                            <div style="border: 2px solid #6272a4; padding: 20px; border-radius: 10px;">
+                                <h1>25:00</h1>
+                                <button style="background:#50fa7b; border:none; padding:5px 10px;">Start</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section data-autoslide="9000">
+                    <h3>Step 2: 核心功能與 Agent 除錯</h3>
+                    <div style="text-align: left; font-size: 0.8em;">
+                        <strong>需求：</strong> "點擊開始後倒計時，結束時播放一段提示音。"
+                        <br><br>
+                        <strong>遇到 Bug：</strong> 點擊暫停後再開始，時間跳動異常（倒計時加速了）。
+                        <br><br>
+                        <strong>Vibe Debugging：</strong>
+                        不要自己去查 `useEffect` 依賴。直接把 Bug 現象告訴 Trae/Cursor：
+                        <br>
+                        <em>"點擊暫停再開始，計時器速度變快了，好像是有多個 setInterval 在執行，幫我修復它。"</em>
+                        <br><br>
+                        <strong>Agent 行動：</strong> 自動定位到 `useEffect` 清理函式缺失，新增 `clearInterval`，問題解決。
+                    </div>
+                </section>
+
+                <section data-autoslide="8000">
+                    <h3>Step 3: 部署與維護</h3>
+                    <div style="font-size: 0.8em;">
+                        <strong>利用 CLI / Skills：</strong>
+                        <br><br>
+                        <code>@Terminal 幫我打包這個專案 (npm run build)</code>
+                        <br>
+                        <code>@Terminal 檢查 build 資料夾大小，如果超過 1MB 給我報警。</code>
+                        <br>
+                        <code>@Agent 使用 Vercel CLI 部署當前專案，並將生產環境 URL 存到 README 中。</code>
+                    </div>
+                    <div style="margin-top: 30px; background: #44475a; padding: 10px; border-radius: 5px;">
+                        🎉 <strong>專案上線完成！全程未手動編寫一行 HTML/CSS。</strong>
+                    </div>
+                </section>
+            </section>
+
+            <!-- Conclusion -->
+            <section data-autoslide="10000" data-transition="zoom">
+                <h2>總結</h2>
+                <ul>
+                    <li class="fragment"><strong>Vibe Coding</strong> 是心態的轉變：敢於放手讓 AI 寫程式碼。</li>
+                    <li class="fragment"><strong>工具 (Cursor/Trae)</strong> 是你的外骨骼機甲。</li>
+                    <li class="fragment"><strong>MCP & Skills</strong> 是連線世界的橋樑。</li>
+                    <li class="fragment"><strong>Agent</strong> 是你未來的數字同事。</li>
+                </ul>
+                <p style="margin-top: 40px; color: #50fa7b;">擁抱變化，成為 AI 的指揮官！</p>
+            </section>
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/reveal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.5.0/plugin/highlight/highlight.min.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: false, // Disabled to prevent SecurityError in sandboxed iframe/blob environments
+            history: false, // Disabled to prevent history API access issues
+            controls: true,
+            progress: true,
+            center: true,
+            
+            // Auto-slide configuration for video recording
+            autoSlide: 5000, // Default time per slide (ms)
+            loop: false,     // Stop at end
+            autoSlideStoppable: false, // Prevent stopping on click
+
+            // Enhanced animations and transitions
+            transition: 'concave', // Default slide transition
+            transitionSpeed: 'fast', // Transition speed: default/fast/slow
+            backgroundTransition: 'zoom', // Background transition
+            
+            // Enhanced fragment animations
+            fragmentInSpeed: 500, // Speed of fragments appearing
+            fragmentOutSpeed: 300, // Speed of fragments disappearing
+            
+            // Parallax background effect
+            parallaxBackgroundImage: '', // Optional parallax background
+            parallaxBackgroundSize: '', // Size of parallax background
+            
+            // More advanced options
+            width: 1200, // Presentation width
+            height: 800, // Presentation height
+            margin: 0.1, // Margin around content
+            minScale: 0.5, // Minimum scale
+            maxScale: 2.0, // Maximum scale
+            
+            // Add bounce effect to transitions
+            easing: 'ease-in-out-cubic', // Transition easing function
+            
+            plugins: [ RevealHighlight ],
+            
+            // Add custom slide animations
+            customcontrols: {
+                controls: [
+                    { icon: '▶', title: 'Next', action: 'Reveal.next();' },
+                    { icon: '◀', title: 'Previous', action: 'Reveal.prev();' }
+                ]
+            }
+        });
+        
+        // Add custom animation for slide elements
+        Reveal.addEventListener('slidechanged', function(event) {
+            // Animate all elements on the new slide
+            const slideElements = event.currentSlide.querySelectorAll('*');
+            slideElements.forEach((element, index) => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    element.style.opacity = '1';
+                    element.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
+        });
+        
+        // Initialize animations on the first slide
+        document.addEventListener('DOMContentLoaded', function() {
+            const firstSlideElements = document.querySelector('.reveal .slides section:first-child *');
+            if (firstSlideElements) {
+                const elements = Array.from(document.querySelector('.reveal .slides section:first-child').children);
+                elements.forEach((element, index) => {
+                    element.style.opacity = '0';
+                    element.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        element.style.opacity = '1';
+                        element.style.transform = 'translateY(0)';
+                    }, index * 100);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

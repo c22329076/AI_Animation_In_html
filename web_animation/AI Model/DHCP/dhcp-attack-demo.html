@@ -1,0 +1,481 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DHCP攻擊演示：一招讓舍友斷網！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        // 自定義Tailwind配置：誇張色彩與動態效果
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        attack: '#FF3A3A',    // 攻擊紅色（刺眼警示）
+                        normal: '#36D399',    // 正常綠色（鮮明對比）
+                        fake: '#FFCC00',      // 虛假配置黃色（醒目提醒）
+                        network: '#3B82F6',   // 網路藍色（科技感）
+                    },
+                    animation: {
+                        'pulse-fast': 'pulse 1s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-slow': 'bounce 2s infinite',
+                        'shake': 'shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both',
+                        'flow': 'flow 3s linear infinite',
+                    },
+                    keyframes: {
+                        shake: {
+                            '10%, 90%': { transform: 'translate3d(-1px, 0, 0)' },
+                            '20%, 80%': { transform: 'translate3d(2px, 0, 0)' },
+                            '30%, 50%, 70%': { transform: 'translate3d(-4px, 0, 0)' },
+                            '40%, 60%': { transform: 'translate3d(4px, 0, 0)' },
+                        },
+                        flow: {
+                            '0%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                            '100%': { transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto { content-visibility: auto; }
+            .text-shadow { text-shadow: 0 0 8px rgba(255, 58, 58, 0.8); }
+            .border-glow { box-shadow: 0 0 12px rgba(255, 204, 0, 0.7); }
+            .bg-grid { background-image: linear-gradient(#3B82F633 1px, transparent 1px), linear-gradient(90deg, #3B82F633 1px, transparent 1px); background-size: 20px 20px; }
+            .packet { width: 12px; height: 12px; border-radius: 50%; position: absolute; }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen overflow-x-hidden">
+    <!-- 頂部警告條 -->
+    <div class="bg-attack/90 text-white py-3 px-4 sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto flex items-center justify-center text-lg font-bold">
+            <i class="fa fa-exclamation-triangle mr-3 animate-pulse-fast"></i>
+            <span>警告：本演示僅用於網路安全科普，非法攻擊涉嫌違法！</span>
+        </div>
+    </div>
+
+    <!-- 標題區域：誇張衝擊力 -->
+    <header class="relative py-16 px-4 overflow-hidden bg-grid">
+        <div class="absolute inset-0 bg-network/10"></div>
+        <div class="container mx-auto relative z-10">
+            <h1 class="text-[clamp(2rem,5vw,4rem)] font-black text-center text-shadow mb-6 animate-bounce-slow">
+                繼ARP欺騙後！<span class="text-attack">DHCP攻擊</span>讓舍友斷網
+            </h1>
+            <p class="text-[clamp(1.2rem,3vw,1.8rem)] text-gray-300 text-center max-w-4xl mx-auto">
+                連同一WiFi？幾行程式碼！<span class="text-fake font-bold">IP池耗盡</span> / <span class="text-fake font-bold">資料偷取</span>，全宿舍瞬間斷網！
+            </p>
+            <div class="flex justify-center mt-10">
+                <button id="startDemo" class="bg-attack hover:bg-attack/80 text-white font-bold py-4 px-8 rounded-lg text-xl shadow-lg hover:shadow-attack/50 transition-all duration-300">
+                    <i class="fa fa-play mr-2"></i>開始攻擊演示
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 演示主區域：網路拓撲視覺化 -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- 場景切換按鈕 -->
+        <div class="flex justify-center gap-4 mb-10">
+            <button id="dhcpSpoofBtn" class="bg-fake text-gray-900 font-bold py-2 px-6 rounded-lg active:scale-95 transition-all">
+                DHCP欺騙攻擊（偷資料）
+            </button>
+            <button id="dhcpFloodBtn" class="bg-gray-700 hover:bg-gray-600 font-bold py-2 px-6 rounded-lg active:scale-95 transition-all">
+                DHCP泛洪攻擊（斷網）
+            </button>
+        </div>
+
+        <!-- 網路拓撲圖：誇張視覺化 -->
+        <div id="networkTopo" class="relative h-[500px] bg-gray-800/50 rounded-2xl p-6 border border-network/30 overflow-hidden">
+            <!-- 合法DHCP伺服器 -->
+            <div id="legalDhcp" class="absolute top-8 left-8 w-40 h-24 bg-normal/20 border-2 border-normal rounded-xl p-3 flex flex-col items-center justify-center transition-all duration-500">
+                <i class="fa fa-server text-3xl text-normal mb-2"></i>
+                <span class="font-bold">合法DHCP伺服器</span>
+                <span class="text-xs text-gray-400">IP: 192.168.1.1</span>
+                <div id="ipPool" class="mt-2 text-xs bg-gray-700/50 px-2 py-1 rounded">IP池: 254/254</div>
+            </div>
+
+            <!-- 攻擊者裝置 -->
+            <div id="attacker" class="absolute top-8 right-8 w-40 h-24 bg-attack/20 border-2 border-attack rounded-xl p-3 flex flex-col items-center justify-center transition-all duration-500">
+                <i class="fa fa-laptop text-3xl text-attack mb-2"></i>
+                <span class="font-bold">攻擊者裝置</span>
+                <span class="text-xs text-gray-400">IP: 192.168.1.88</span>
+                <div id="attackStatus" class="mt-2 text-xs bg-attack/30 px-2 py-1 rounded hidden">攻擊中...</div>
+            </div>
+
+            <!-- 舍友裝置（多個，誇張數量） -->
+            <div class="absolute bottom-8 left-1/4 -translate-x-1/2 w-32 h-20 bg-gray-600/50 border-2 border-gray-400 rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-500" id="roommate1">
+                <i class="fa fa-mobile text-2xl text-gray-300 mb-1"></i>
+                <span class="font-bold text-sm">舍友1手機</span>
+                <div id="roommate1Status" class="mt-1 text-xs bg-normal/30 px-2 py-1 rounded">線上</div>
+            </div>
+            <div class="absolute bottom-8 left-1/2 -translate-x-1/2 w-32 h-20 bg-gray-600/50 border-2 border-gray-400 rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-500" id="roommate2">
+                <i class="fa fa-laptop text-2xl text-gray-300 mb-1"></i>
+                <span class="font-bold text-sm">舍友2電腦</span>
+                <div id="roommate2Status" class="mt-1 text-xs bg-normal/30 px-2 py-1 rounded">線上</div>
+            </div>
+            <div class="absolute bottom-8 right-1/4 -translate-x-1/2 w-32 h-20 bg-gray-600/50 border-2 border-gray-400 rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-500" id="roommate3">
+                <i class="fa fa-tablet text-2xl text-gray-300 mb-1"></i>
+                <span class="font-bold text-sm">舍友3平板</span>
+                <div id="roommate3Status" class="mt-1 text-xs bg-normal/30 px-2 py-1 rounded">線上</div>
+            </div>
+
+            <!-- 網路連線線（虛線） -->
+            <div class="absolute top-24 left-48 right-48 h-0.5 bg-network/40 border-dashed border-2 border-network/60"></div>
+            <div class="absolute top-24 left-48 bottom-28 w-0.5 bg-network/40 border-dashed border-2 border-network/60 -translate-x-1/2"></div>
+            <div class="absolute top-24 left-1/2 bottom-28 w-0.5 bg-network/40 border-dashed border-2 border-network/60 -translate-x-1/2"></div>
+            <div class="absolute top-24 right-48 bottom-28 w-0.5 bg-network/40 border-dashed border-2 border-network/60 translate-x-1/2"></div>
+
+            <!-- 資料包動畫容器 -->
+            <div id="packetContainer" class="absolute inset-0 pointer-events-none"></div>
+
+            <!-- 攻擊結果彈窗（初始隱藏） -->
+            <div id="attackResult" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-gray-900/95 border-2 border-attack rounded-xl p-6 w-[clamp(300px,60vw,500px)] z-20 hidden">
+                <h3 class="text-2xl font-bold text-attack mb-4 text-center">攻擊成功！</h3>
+                <div id="resultContent" class="space-y-3 text-gray-300">
+                    <!-- 欺騙攻擊結果 -->
+                    <div id="spoofResult" class="block">
+                        <p><i class="fa fa-check-circle text-fake mr-2"></i>舍友裝置已接收<span class="text-fake font-bold">虛假DHCP配置</span></p>
+                        <p><i class="fa fa-check-circle text-fake mr-2"></i>閘道器被篡改為：<span class="font-bold">192.168.1.88（攻擊者IP）</span></p>
+                        <p><i class="fa fa-check-circle text-fake mr-2"></i>DNS被篡改為：<span class="font-bold">192.168.1.88（惡意DNS）</span></p>
+                        <p><i class="fa fa-check-circle text-attack mr-2"></i>舍友瀏覽的<span class="font-bold">圖片、表單資料</span>已被竊取！</p>
+                    </div>
+                    <!-- 泛洪攻擊結果 -->
+                    <div id="floodResult" class="hidden">
+                        <p><i class="fa fa-check-circle text-attack mr-2"></i>DHCP伺服器IP池已耗盡：<span class="font-bold">0/254</span></p>
+                        <p><i class="fa fa-check-circle text-attack mr-2"></i>新裝置無法獲取IP，提示<span class="font-bold">“無有效IP配置”</span></p>
+                        <p><i class="fa fa-check-circle text-attack mr-2"></i>全宿舍裝置<span class="font-bold">連WiFi卻上不了網</span>！</p>
+                        <p><i class="fa fa-check-circle text-attack mr-2"></i>DHCP伺服器CPU佔用率：<span class="font-bold">95%（瀕臨宕機）</span></p>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-6">
+                    <button id="resetDemo" class="bg-normal hover:bg-normal/80 text-white font-bold py-2 px-6 rounded-lg transition-all">
+                        <i class="fa fa-refresh mr-2"></i>重置演示
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 攻擊原理說明（誇張圖示+大字型） -->
+        <div class="mt-16 max-w-5xl mx-auto">
+            <h2 class="text-3xl font-bold mb-8 text-center text-network">攻擊原理拆解</h2>
+            <div id="spoofPrinciple" class="space-y-6">
+                <div class="bg-gray-800/50 p-6 rounded-xl border-l-4 border-fake">
+                    <h3 class="text-xl font-bold text-fake mb-3"><i class="fa fa-chess-king mr-2"></i>DHCP欺騙攻擊：偷資料的“假伺服器”</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-300 pl-4">
+                        <li>攻擊者連入宿舍WiFi，啟動<span class="text-fake font-bold">惡意DHCP服務</span>（如Kali的dnsmasq）</li>
+                        <li>舍友裝置發DHCP Discover請求時，攻擊者<span class="text-attack font-bold">優先傳送虛假Offer</span>（比合法伺服器快）</li>
+                        <li>舍友裝置“先到先得”，使用<span class="text-fake font-bold">假閘道器、假DNS</span>配置</li>
+                        <li>所有流量先經過攻擊者裝置，用Burp Suite抓包竊取資料，甚至篡改HTTP內容！</li>
+                    </ol>
+                </div>
+            </div>
+            <div id="floodPrinciple" class="space-y-6 hidden">
+                <div class="bg-gray-800/50 p-6 rounded-xl border-l-4 border-attack">
+                    <h3 class="text-xl font-bold text-attack mb-3"><i class="fa fa-tint mr-2"></i>DHCP泛洪攻擊：佔IP的“洪水”</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-gray-300 pl-4">
+                        <li>攻擊者用dhcpstarv/hping3工具，<span class="text-attack font-bold">偽造海量虛假裝置請求</span>（篡改MAC/Client ID）</li>
+                        <li>每秒傳送<span class="font-bold">1000+ DHCP Discover包</span>，騙走伺服器所有IP</li>
+                        <li>合法裝置連網時，伺服器<span class="text-attack font-bold">無IP可分配</span>，提示“無有效IP配置”</li>
+                        <li>伺服器CPU飆升、負載過載，甚至直接宕機，全樓斷網！</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+        <!-- 防禦方法（對比強烈） -->
+        <div class="mt-16 max-w-5xl mx-auto bg-gray-800/30 rounded-2xl p-8 border border-normal/30">
+            <h2 class="text-3xl font-bold mb-8 text-center text-normal">如何防住？<span class="text-white">看完就能用！</span></h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- 個人防禦 -->
+                <div class="bg-gray-800/50 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold text-normal mb-4"><i class="fa fa-shield mr-2"></i>個人使用者防禦</h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fa fa-check text-normal mt-1 mr-2"></i>
+                            <div>
+                                <span class="font-bold text-white">手動配置靜態IP</span>：先自動獲取查合法閘道器/子網掩碼，再改“手動”填入，繞過DHCP欺騙
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check text-normal mt-1 mr-2"></i>
+                            <div>
+                                <span class="font-bold text-white">指定公共DNS</span>：阿里雲(223.5.5.5)、騰訊雲(119.29.29.29)，避免DNS劫持
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check text-normal mt-1 mr-2"></i>
+                            <div>
+                                <span class="font-bold text-white">認準HTTPS</span>：所有轉賬、登入操作，必須用“https://”開頭網站，防資料竊取
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <!-- 企業防禦 -->
+                <div class="bg-gray-800/50 p-6 rounded-xl">
+                    <h3 class="text-xl font-bold text-normal mb-4"><i class="fa fa-building mr-2"></i>企業/宿舍管理員防禦</h3>
+                    <ul class="space-y-3 text-gray-300">
+                        <li class="flex items-start">
+                            <i class="fa fa-check text-normal mt-1 mr-2"></i>
+                            <div>
+                                <span class="font-bold text-white">打開DHCP Snooping</span>：交換機區分“信任連接埠”（連合法伺服器）和“非信任連接埠”（攔惡意Offer）
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check text-normal mt-1 mr-2"></i>
+                            <div>
+                                <span class="font-bold text-white">防泛洪配置</span>：限制介面最大MAC學習數，攔截海量虛假請求（如新華三“防餓死攻擊”）
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-check text-normal mt-1 mr-2"></i>
+                            <div>
+                                <span class="font-bold text-white">連接埠過濾</span>：僅允許UDP 67/68連接埠合法報文透過，阻斷攻擊流量
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="bg-gray-800/80 py-8 px-4 mt-20">
+        <div class="container mx-auto text-center text-gray-400">
+            <p class="mb-4">本頁面僅為網路安全科普演示，請勿用於非法用途！</p>
+            <p>網路安全靠大家，維護合法網路環境，人人有責！</p>
+        </div>
+    </footer>
+
+    <script>
+        // 全域性變數
+        let attackType = 'spoof'; // 預設欺騙攻擊
+        let animationInterval = null;
+        let ipPoolCount = 254;
+
+        // DOM元素
+        const startDemoBtn = document.getElementById('startDemo');
+        const resetDemoBtn = document.getElementById('resetDemo');
+        const dhcpSpoofBtn = document.getElementById('dhcpSpoofBtn');
+        const dhcpFloodBtn = document.getElementById('dhcpFloodBtn');
+        const networkTopo = document.getElementById('networkTopo');
+        const packetContainer = document.getElementById('packetContainer');
+        const attackStatus = document.getElementById('attackStatus');
+        const ipPool = document.getElementById('ipPool');
+        const attackResult = document.getElementById('attackResult');
+        const resultContent = document.getElementById('resultContent');
+        const spoofResult = document.getElementById('spoofResult');
+        const floodResult = document.getElementById('floodResult');
+        const spoofPrinciple = document.getElementById('spoofPrinciple');
+        const floodPrinciple = document.getElementById('floodPrinciple');
+        const roommate1Status = document.getElementById('roommate1Status');
+        const roommate2Status = document.getElementById('roommate2Status');
+        const roommate3Status = document.getElementById('roommate3Status');
+        const legalDhcp = document.getElementById('legalDhcp');
+        const attacker = document.getElementById('attacker');
+
+        // 切換攻擊型別
+        dhcpSpoofBtn.addEventListener('click', () => {
+            attackType = 'spoof';
+            dhcpSpoofBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+            dhcpSpoofBtn.classList.add('bg-fake', 'text-gray-900');
+            dhcpFloodBtn.classList.remove('bg-fake', 'text-gray-900');
+            dhcpFloodBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+            spoofPrinciple.classList.remove('hidden');
+            floodPrinciple.classList.add('hidden');
+            resetDemo();
+        });
+
+        dhcpFloodBtn.addEventListener('click', () => {
+            attackType = 'flood';
+            dhcpFloodBtn.classList.remove('bg-gray-700', 'hover:bg-gray-600');
+            dhcpFloodBtn.classList.add('bg-fake', 'text-gray-900');
+            dhcpSpoofBtn.classList.remove('bg-fake', 'text-gray-900');
+            dhcpSpoofBtn.classList.add('bg-gray-700', 'hover:bg-gray-600');
+            floodPrinciple.classList.remove('hidden');
+            spoofPrinciple.classList.add('hidden');
+            resetDemo();
+        });
+
+        // 生成資料包動畫
+        function createPacket(startX, startY, endX, endY, color) {
+            const packet = document.createElement('div');
+            packet.className = 'packet';
+            packet.style.backgroundColor = color;
+            packet.style.left = `${startX}px`;
+            packet.style.top = `${startY}px`;
+            packetContainer.appendChild(packet);
+
+            // 資料包移動動畫
+            const duration = 1500;
+            const startTime = Date.now();
+            const animatePacket = () => {
+                const elapsed = Date.now() - startTime;
+                if (elapsed > duration) {
+                    packet.remove();
+                    return;
+                }
+                const progress = elapsed / duration;
+                const currentX = startX + (endX - startX) * progress;
+                const currentY = startY + (endY - startY) * progress;
+                packet.style.left = `${currentX}px`;
+                packet.style.top = `${currentY}px`;
+                requestAnimationFrame(animatePacket);
+            };
+            requestAnimationFrame(animatePacket);
+        }
+
+        // 欺騙攻擊動畫
+        function spoofAnimation() {
+            // 攻擊者傳送虛假Offer包（黃色）
+            const attackerRect = attacker.getBoundingClientRect();
+            const topoRect = networkTopo.getBoundingClientRect();
+            const attackerX = attackerRect.left - topoRect.left + attackerRect.width / 2;
+            const attackerY = attackerRect.top - topoRect.top + attackerRect.height / 2;
+
+            // 向三個舍友裝置發包
+            const roommates = [
+                document.getElementById('roommate1'),
+                document.getElementById('roommate2'),
+                document.getElementById('roommate3')
+            ];
+
+            roommates.forEach(roommate => {
+                const roommateRect = roommate.getBoundingClientRect();
+                const roommateX = roommateRect.left - topoRect.left + roommateRect.width / 2;
+                const roommateY = roommateRect.top - topoRect.top + roommateRect.height / 2;
+                createPacket(attackerX, attackerY, roommateX, roommateY, '#FFCC00');
+            });
+
+            // 舍友裝置狀態變化
+            setTimeout(() => {
+                roommate1Status.classList.remove('bg-normal/30');
+                roommate1Status.classList.add('bg-fake/30', 'text-gray-900', 'font-bold');
+                roommate1Status.textContent = '已劫持';
+                roommate2Status.classList.remove('bg-normal/30');
+                roommate2Status.classList.add('bg-fake/30', 'text-gray-900', 'font-bold');
+                roommate2Status.textContent = '已劫持';
+                roommate3Status.classList.remove('bg-normal/30');
+                roommate3Status.classList.add('bg-fake/30', 'text-gray-900', 'font-bold');
+                roommate3Status.textContent = '已劫持';
+
+                // 顯示攻擊結果
+                setTimeout(() => {
+                    clearInterval(animationInterval);
+                    spoofResult.classList.remove('hidden');
+                    floodResult.classList.add('hidden');
+                    attackResult.classList.remove('hidden');
+                }, 1500);
+            }, 2000);
+        }
+
+        // 泛洪攻擊動畫
+        function floodAnimation() {
+            // 攻擊者向合法DHCP發大量請求包（紅色）
+            const attackerRect = attacker.getBoundingClientRect();
+            const legalDhcpRect = legalDhcp.getBoundingClientRect();
+            const topoRect = networkTopo.getBoundingClientRect();
+            const attackerX = attackerRect.left - topoRect.left + attackerRect.width / 2;
+            const attackerY = attackerRect.top - topoRect.top + attackerRect.height / 2;
+            const dhcpX = legalDhcpRect.left - topoRect.left + legalDhcpRect.width / 2;
+            const dhcpY = legalDhcpRect.top - topoRect.top + legalDhcpRect.height / 2;
+
+            // 發10個包/次，快速消耗IP池
+            for (let i = 0; i < 10; i++) {
+                createPacket(attackerX, attackerY, dhcpX, dhcpY, '#FF3A3A');
+            }
+
+            // IP池減少
+            ipPoolCount = Math.max(0, ipPoolCount - 20);
+            ipPool.textContent = `IP池: ${ipPoolCount}/254`;
+            ipPool.classList.add('animate-shake');
+            setTimeout(() => ipPool.classList.remove('animate-shake'), 500);
+
+            // 合法DHCP伺服器閃爍（負載過高）
+            legalDhcp.classList.add('border-glow');
+            setTimeout(() => legalDhcp.classList.remove('border-glow'), 300);
+
+            // IP池耗盡，顯示結果
+            if (ipPoolCount <= 0) {
+                clearInterval(animationInterval);
+                roommate1Status.classList.remove('bg-normal/30');
+                roommate1Status.classList.add('bg-attack/30', 'text-white', 'font-bold');
+                roommate1Status.textContent = '斷網';
+                roommate2Status.classList.remove('bg-normal/30');
+                roommate2Status.classList.add('bg-attack/30', 'text-white', 'font-bold');
+                roommate2Status.textContent = '斷網';
+                roommate3Status.classList.remove('bg-normal/30');
+                roommate3Status.classList.add('bg-attack/30', 'text-white', 'font-bold');
+                roommate3Status.textContent = '斷網';
+
+                // 顯示攻擊結果
+                setTimeout(() => {
+                    floodResult.classList.remove('hidden');
+                    spoofResult.classList.add('hidden');
+                    attackResult.classList.remove('hidden');
+                }, 1000);
+            }
+        }
+
+        // 開始演示
+        startDemoBtn.addEventListener('click', () => {
+            resetDemo();
+            startDemoBtn.disabled = true;
+            startDemoBtn.textContent = '攻擊中...';
+            attackStatus.classList.remove('hidden');
+            attacker.classList.add('border-glow');
+
+            // 啟動對應攻擊動畫
+            if (attackType === 'spoof') {
+                animationInterval = setInterval(spoofAnimation, 2000);
+                spoofAnimation(); // 立即執行一次
+            } else {
+                animationInterval = setInterval(floodAnimation, 500);
+                floodAnimation(); // 立即執行一次
+            }
+        });
+
+        // 重置演示
+        resetDemoBtn.addEventListener('click', resetDemo);
+        function resetDemo() {
+            // 清除動畫
+            if (animationInterval) {
+                clearInterval(animationInterval);
+                animationInterval = null;
+            }
+
+            // 清空資料包
+            packetContainer.innerHTML = '';
+
+            // 重置狀態
+            startDemoBtn.disabled = false;
+            startDemoBtn.textContent = '<i class="fa fa-play mr-2"></i>開始攻擊演示';
+            attackStatus.classList.add('hidden');
+            attackResult.classList.add('hidden');
+            attacker.classList.remove('border-glow');
+            legalDhcp.classList.remove('border-glow');
+            ipPoolCount = 254;
+            ipPool.textContent = `IP池: ${ipPoolCount}/254`;
+
+            // 重置舍友狀態
+            roommate1Status.classList.remove('bg-fake/30', 'bg-attack/30', 'text-gray-900', 'text-white', 'font-bold');
+            roommate1Status.classList.add('bg-normal/30');
+            roommate1Status.textContent = '線上';
+            roommate2Status.classList.remove('bg-fake/30', 'bg-attack/30', 'text-gray-900', 'text-white', 'font-bold');
+            roommate2Status.classList.add('bg-normal/30');
+            roommate2Status.textContent = '線上';
+            roommate3Status.classList.remove('bg-fake/30', 'bg-attack/30', 'text-gray-900', 'text-white', 'font-bold');
+            roommate3Status.classList.add('bg-normal/30');
+            roommate3Status.textContent = '線上';
+        }
+
+        // 初始化
+        window.addEventListener('load', resetDemo);
+    </script>
+</body>
+</html>
+
