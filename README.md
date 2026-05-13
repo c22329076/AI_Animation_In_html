@@ -1,4 +1,4 @@
-﻿# AI Animation
+# AI_Animation_In_html
 
 > 使用 AI 生成 HTML 演示動畫的 Prompt 模板集合
 
@@ -23,42 +23,32 @@
 
 ## 目錄結構
 
-```
-AI Animation/
-├── README.md          # 專案說明檔案
-├── prompt.md          # Prompt 模板集合（分類整理）
-├── prompt.txt         # 原始 Prompt 文字
-├── LICENSE            # MIT 開源協議
-├── UI/                # UI 設計參考圖
+```text
+AI_Animation_In_html/
+├── README.md           # 專案說明檔案
+├── prompt.md           # Prompt 模板集合（分類整理）
+├── original-prompt.txt # 原始 Prompt 文字
+├── LICENSE             # MIT 開源協議
+├── UI/                 # UI 設計參考圖
 │   ├── design1.png ~ design6.png
 │   └── timeline.png
-└── web_animation/     # 示例 HTML 動畫檔案
+└── web_animation/      # 示例 HTML 動畫檔案
+    ├── AI Model/               # AI 模型演示（MLP、RNN、LSTM、GRU）
     ├── Animation/              # AI/ML 概念演示（RNN、LSTM、Word2Vec、GPU 等）
     ├── BG/                     # 背景樣式模板
+    ├── catch the packet/       # 資料包捕獲演示
     ├── DHCP/                   # DHCP 協議演示
-    ├── geometry/               # 幾何圖形演示
     ├── nice try/               # 實驗性 Demo
-    ├── Pirated websites/       # 釣魚網站演示（僅供安全教育）
-    ├── PPT Template/            # PPT 風格模板（基礎版，5 個）
+    ├── PPT Template/           # PPT 風格模板（基礎版，5 個）
     │   ├── PPT cover page.html
     │   ├── PPT-Generate-1.html
     │   ├── PPT-Generate-2.html
     │   ├── PPT-Generate-3.html
     │   └── PPT-Generate-4.html
-    ├── PPT Template-level2/     # PPT 風格模板（進階版，27 個）
-    │   ├── 1.html ~ 9-3.html  # 多種佈局變體
-    │   └── png/                # 模板縮圖
-    ├── catch the packet/       # 資料包捕獲演示
-    ├── AI Model/               # AI 模型演示（MLP、RNN、LSTM、GRU）
+    ├── PPT Template-level2/    # PPT 風格模板（進階版，27 個）
+    │   └── 1.html ~ 9-3.html  # 多種佈局變體
     ├── 3D - demonstrate.html
     ├── AI_Animation.html       # AI-Animation Skill 輸出檔案
-    ├── Animation/         # AI/ML 概念演示（RNN、LSTM、Word2Vec、GPU 等）
-    ├── Pirated websites/  # 釣魚網站演示
-    ├── PPT Template/       # PPT 風格模板
-    ├── catch the packet/  # 資料包捕獲演示
-    ├── DHCP/              # DHCP 協議演示
-    ├── geometry/           # 幾何圖形演示
-    ├── 3D - demonstrate.html
     ├── animation.html
     ├── ethernet-frame-animated.html
     ├── HTTPS.html
@@ -78,8 +68,8 @@ AI Animation/
 
 ```bash
 # 克隆倉庫
-git clone https://github.com/Unclecheng-li/AI_Animation.git
-cd AI_Animation
+git clone https://github.com/c22329076/AI_Animation_In_html.git
+cd AI_Animation_In_html
 
 # 在瀏覽器中打開任意 .html 檔案
 # 使用 ← → 方向鍵或滑鼠滾輪翻頁
@@ -133,10 +123,10 @@ cd AI_Animation
 
 本專案僅供學習和研究使用，請勿用於非法用途。
 請勿用於商業用途。
+
 ---
 
 ## 致謝
 
 - AI 工具：[Trae](https://trae.ai/)、Claude、ChatGPT 等
 - 所有參與測試和反饋的社群成員(雖然目前還沒有desuwa)
-
