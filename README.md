@@ -2,7 +2,7 @@
 
 > 使用 AI 生成 HTML 演示動畫的 Prompt 模板集合
 
-[English](README.md) · [Prompts](prompt.md)
+[Prompts](prompt.md)
 
 ---
 
