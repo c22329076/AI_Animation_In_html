@@ -1,6 +1,6 @@
-﻿# Prompt 模板集合
+# Prompt 模板集合
 
-> 以下為 `prompt.txt` 的分類整理版，Prompt 原文原樣保留，僅最佳化排版結構。
+> 以下為 `original-prompt.txt` 的分類整理版，Prompt 原文原樣保留，僅最佳化排版結構。
 
 ---
 
