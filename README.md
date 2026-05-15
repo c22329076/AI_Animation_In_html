@@ -129,4 +129,4 @@ cd AI_Animation_In_html
 ## 致謝
 
 - AI 工具：[Trae](https://trae.ai/)、Claude、ChatGPT 等
-- 所有參與測試和反饋的社群成員(雖然目前還沒有desuwa)
+- 所有參與測試和反饋的社群成員>.^
